@@ -1,0 +1,31 @@
+# Development override — exposes ports and mounts source for hot reload
+# Usage: docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+
+services:
+  postgres:
+    ports:
+      - "5432:5432"
+
+  backend:
+    ports:
+      - "8080:8080"
+    deploy:
+      resources:
+        limits:
+          memory: 1024M
+
+  frontend:
+    ports:
+      - "4000:4000"
+    volumes:
+      - ./invenFront/src:/app/src
+      - ./invenFront/public:/app/public
+    deploy:
+      resources:
+        limits:
+          memory: 1024M
+
+  nginx:
+    ports:
+      - "0.0.0.0:80:80"
+      - "0.0.0.0:443:443"

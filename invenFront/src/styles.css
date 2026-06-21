@@ -1,0 +1,83 @@
+/* You can add global styles to this file, and also import other style files */
+
+:root {
+  /* Primary - Plain Gold */
+  --primary: #FFD600;
+  --primary-dark: #E6C200;
+  --primary-light: #FFE54C;
+
+  /* Backgrounds */
+  --bg-page: #121212;
+  --bg-surface: #1E1E1E;
+  --bg-surface-elevated: #2A2A2A;
+  --bg-input: #2D2D2D;
+
+  /* Borders */
+  --border-color: #3D3D3D;
+  --border-focus: #FFD600;
+
+  /* Text */
+  --text-primary: #F5F5F5;
+  --text-secondary: #A0A0A0;
+  --text-muted: #707070;
+  --text-on-primary: #1A1A1A;
+
+  /* Status colors */
+  --status-available: #4CAF50;
+  --status-assigned: #2196F3;
+  --status-maintenance: #FF9800;
+  --status-unavailable: #F44336;
+  --status-disabled: #9E9E9E;
+
+  /* Action buttons */
+  --btn-view: #2196F3;
+  --btn-edit: #FF9800;
+  --btn-delete: #F44336;
+  --btn-save: #4CAF50;
+  --btn-cancel: #666666;
+
+  /* Misc */
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+  /* Layout */
+  --navbar-height: 64px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  background: var(--bg-page);
+  color: var(--text-primary);
+  font-family: var(--font-family);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-page);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+

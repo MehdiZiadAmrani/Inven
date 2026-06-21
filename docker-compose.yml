@@ -1,0 +1,112 @@
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: inven-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: invenDB
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-inven}
+    # PostgreSQL is only accessible within the Docker network (not exposed to host)
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+    networks:
+      - inven-network
+
+  # Backend (Spring Boot)
+  backend:
+    build:
+      context: ./invenBACK
+      dockerfile: Dockerfile
+    container_name: inven-backend
+    restart: unless-stopped
+    expose:
+      - "8080"
+    environment:
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL:-jdbc:postgresql://postgres:5432/invenDB}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME:-postgres}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD:-inven}
+      JWT_SECRET: ${JWT_SECRET:-changeme-inven-base64-secret-key-must-change}
+      JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS:-86400000}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://localhost:8080/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+    networks:
+      - inven-network
+
+  # Frontend (Angular SSR)
+  frontend:
+    build:
+      context: ./invenFront
+      dockerfile: Dockerfile
+    container_name: inven-frontend
+    restart: unless-stopped
+    expose:
+      - "4000"
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:4000/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+    networks:
+      - inven-network
+
+  # Nginx Reverse Proxy
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    container_name: inven-nginx
+    restart: unless-stopped
+    ports:
+      - "0.0.0.0:80:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+      frontend:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 128M
+    networks:
+      - inven-network
+
+networks:
+  inven-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
