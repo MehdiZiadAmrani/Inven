@@ -5,6 +5,8 @@ import { provideHttpClient, withInterceptorsFromDi, HTTP_INTERCEPTORS, withFetch
 import { routes } from './app.routes';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
 import { TokenInterceptor } from './services/token.interceptor';
+
+
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),

@@ -12,19 +12,17 @@ import { join } from 'node:path';
 const browserDistFolder = join(import.meta.dirname, '../browser');
 
 const app = express();
-const angularApp = new AngularNodeAppEngine();
 
-/**
- * Example Express Rest API endpoints can be defined here.
- * Uncomment and define endpoints as necessary.
- *
- * Example:
- * ```ts
- * app.get('/api/{*splat}', (req, res) => {
- *   // Handle API request
- * });
- * ```
- */
+// Trust the Nginx reverse proxy so $host / X-Forwarded-* headers are used
+app.set('trust proxy', true);
+
+// Allow Angular SSR to accept requests from any host
+// (Nginx is the public gatekeeper — SSR doesn't need to re-validate hostnames)
+process.env['ANGULAR_SSR_ALLOWED_HOSTS'] = '*';
+
+process.env['ANGULAR_APP_BASE_URL'] = 'http://localhost:4000';
+
+const angularApp = new AngularNodeAppEngine();
 
 /**
  * Serve static files from /browser
@@ -50,8 +48,8 @@ app.use((req, res, next) => {
 });
 
 /**
- * Start the server if this module is the main entry point, or it is ran via PM2.
- * The server listens on the port defined by the `PORT` environment variable, or defaults to 4000.
+ * Start the server if this module is the main entry point.
+ * Defaults to port 4000.
  */
 if (isMainModule(import.meta.url) || process.env['pm_id']) {
   const port = process.env['PORT'] || 4000;
@@ -59,12 +57,11 @@ if (isMainModule(import.meta.url) || process.env['pm_id']) {
     if (error) {
       throw error;
     }
-
     console.log(`Node Express server listening on http://localhost:${port}`);
   });
 }
 
 /**
- * Request handler used by the Angular CLI (for dev-server and during build) or Firebase Cloud Functions.
+ * Request handler used by the Angular CLI (dev-server and build) or Firebase.
  */
 export const reqHandler = createNodeRequestHandler(app);

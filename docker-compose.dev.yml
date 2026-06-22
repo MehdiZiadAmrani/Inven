@@ -17,9 +17,8 @@ services:
   frontend:
     ports:
       - "4000:4000"
-    volumes:
-      - ./invenFront/src:/app/src
-      - ./invenFront/public:/app/public
+    # Source mounts don't enable HMR in a compiled SSR container
+    # Use `ng serve` outside Docker for real hot reload (see proxy.conf.json)
     deploy:
       resources:
         limits:
@@ -28,4 +27,4 @@ services:
   nginx:
     ports:
       - "0.0.0.0:80:80"
-      - "0.0.0.0:443:443"
+      # 443 removed — no TLS config in nginx.conf yet
